@@ -1,0 +1,374 @@
+<html><head></head><body><div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a href="https://github.com/substack/psy#readme">psy (v1.8.1)</a>
+</h1>
+<h4>process monitor command</h4>
+<div class="apidocSectionDiv"><a href="#apidoc.tableOfContents" id="apidoc.tableOfContents"><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.psy">module psy</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.psy.psy">
+            function <span class="apidocSignatureSpan"></span>psy
+            <span class="apidocSignatureSpan">(args)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.psy.server">
+            function <span class="apidocSignatureSpan">psy.</span>server
+            <span class="apidocSignatureSpan">(server, stream, args)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.psy.toString">
+            function <span class="apidocSignatureSpan">psy.</span>toString
+            <span class="apidocSignatureSpan">()</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.psy.server">module psy.server</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.psy.server.server">
+            function <span class="apidocSignatureSpan">psy.</span>server
+            <span class="apidocSignatureSpan">(server, stream, args)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.psy.toString">module psy.toString</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.psy.toString.toString">
+            function <span class="apidocSignatureSpan">psy.</span>toString
+            <span class="apidocSignatureSpan">()</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.psy" id="apidoc.module.psy">module psy</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.psy.psy" id="apidoc.element.psy.psy">
+        function <span class="apidocSignatureSpan"></span>psy
+        <span class="apidocSignatureSpan">(args)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function Psy(args) {
+  if (!(this instanceof Psy)) return new Psy(args)
+  args = args || {}
+  this.opts = defaults(args)
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.psy.server" id="apidoc.element.psy.server">
+        function <span class="apidocSignatureSpan">psy.</span>server
+        <span class="apidocSignatureSpan">(server, stream, args)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">server = function (server, stream, args) {
+  var argv = minimist(args)
+  if (!psy) psy = new Psy(argv)
+  psy.on('error', onerror)
+  connected++
+  onend(stream, function () {
+    psy.removeListener('error', onerror)
+    connected--
+    if (!argv.autoclose) return
+    if (connected === 0 &amp;&amp; psy.group.list().length === 0) {
+      setTimeout(function () {
+        if (connected !== 0) return
+        if (psy.group.list().length &gt; 0) return
+        server.close()
+      }, 1000)
+    }
+  })
+  function onerror (err) { stream.emit('error', err) }
+
+  return {
+    start: psy.start.bind(psy),
+    stop: psy.stop.bind(psy),
+    restart: psy.restart.bind(psy),
+    remove: psy.remove.bind(psy),
+    log: psy.log.bind(psy),
+    list: psy.list.bind(psy),
+    close: function (cb) {
+      if (typeof cb !== 'function') cb = noop
+      psy.group.list().forEach(function (item) {
+        psy.group.remove(item.id)
+      })
+      server.close()
+      cb()
+    },
+    reset: function (cb) {
+      if (typeof cb !== 'function') cb = noop
+      server.close()
+      var pending = 3
+      fs.unlink(psy.pidfile, done)
+      fs.unlink(psy.sockfile, done)
+      fs.unlink(psy.statefile, done)
+      function done (err) {
+        if (err) cb(err)
+        else if (--pending === 0) cb()
+      }
+    },
+    kill: function (cb) {
+      server.close()
+      cb()
+      process.exit()
+    }
+  }
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+* `psypath`: PSY_PATH
+* `statefile`: PSY_STATEFILE
+* `sockfile`: PSY_SOCKFILE
+* `pidfile`: PSY_PIDFILE
+* `rpcfile`: path to rpc server
+* `debug`: boolean to debug.
+
+### ```psy.<span class="apidocCodeKeywordSpan">server</span>(cb)```
+
+Starts a psy server, does not close it.
+
+```js
+psy.server(argv, function (err, r, c) {
+if (err) error(err)
+else c.end()
+...</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.psy.toString" id="apidoc.element.psy.toString">
+        function <span class="apidocSignatureSpan">psy.</span>toString
+        <span class="apidocSignatureSpan">()</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">toString = function () {
+    return text;
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+    cb(err)
+  })
+})
+}
+
+Psy.prototype.start = function (cmd, args, cb) {
+var self = this
+var name = defined(args.name, randomBytes(4).<span class="apidocCodeKeywordSpan">toString</span>('hex'))
+var opts = {
+  cwd: defined(args.cwd, process.cwd()),
+  env: args.env,
+  maxRestarts: defined(args.maxRestarts, -1),
+  sleep: defined(args.sleep, 0),
+  logfile: args.logfile
+}
+...</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.psy.server" id="apidoc.module.psy.server">module psy.server</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.psy.server.server" id="apidoc.element.psy.server.server">
+        function <span class="apidocSignatureSpan">psy.</span>server
+        <span class="apidocSignatureSpan">(server, stream, args)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">server = function (server, stream, args) {
+  var argv = minimist(args)
+  if (!psy) psy = new Psy(argv)
+  psy.on('error', onerror)
+  connected++
+  onend(stream, function () {
+    psy.removeListener('error', onerror)
+    connected--
+    if (!argv.autoclose) return
+    if (connected === 0 &amp;&amp; psy.group.list().length === 0) {
+      setTimeout(function () {
+        if (connected !== 0) return
+        if (psy.group.list().length &gt; 0) return
+        server.close()
+      }, 1000)
+    }
+  })
+  function onerror (err) { stream.emit('error', err) }
+
+  return {
+    start: psy.start.bind(psy),
+    stop: psy.stop.bind(psy),
+    restart: psy.restart.bind(psy),
+    remove: psy.remove.bind(psy),
+    log: psy.log.bind(psy),
+    list: psy.list.bind(psy),
+    close: function (cb) {
+      if (typeof cb !== 'function') cb = noop
+      psy.group.list().forEach(function (item) {
+        psy.group.remove(item.id)
+      })
+      server.close()
+      cb()
+    },
+    reset: function (cb) {
+      if (typeof cb !== 'function') cb = noop
+      server.close()
+      var pending = 3
+      fs.unlink(psy.pidfile, done)
+      fs.unlink(psy.sockfile, done)
+      fs.unlink(psy.statefile, done)
+      function done (err) {
+        if (err) cb(err)
+        else if (--pending === 0) cb()
+      }
+    },
+    kill: function (cb) {
+      server.close()
+      cb()
+      process.exit()
+    }
+  }
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+* `psypath`: PSY_PATH
+* `statefile`: PSY_STATEFILE
+* `sockfile`: PSY_SOCKFILE
+* `pidfile`: PSY_PIDFILE
+* `rpcfile`: path to rpc server
+* `debug`: boolean to debug.
+
+### ```psy.<span class="apidocCodeKeywordSpan">server</span>(cb)```
+
+Starts a psy server, does not close it.
+
+```js
+psy.server(argv, function (err, r, c) {
+if (err) error(err)
+else c.end()
+...</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.psy.toString" id="apidoc.module.psy.toString">module psy.toString</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.psy.toString.toString" id="apidoc.element.psy.toString.toString">
+        function <span class="apidocSignatureSpan">psy.</span>toString
+        <span class="apidocSignatureSpan">()</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function toString() { [native code] }</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+    cb(err)
+  })
+})
+}
+
+Psy.prototype.start = function (cmd, args, cb) {
+var self = this
+var name = defined(args.name, randomBytes(4).<span class="apidocCodeKeywordSpan">toString</span>('hex'))
+var opts = {
+  cwd: defined(args.cwd, process.cwd()),
+  env: args.env,
+  maxRestarts: defined(args.maxRestarts, -1),
+  sleep: defined(args.sleep, 0),
+  logfile: args.logfile
+}
+...</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
+</body></html>
