@@ -1,4 +1,7 @@
-# api documentation for  [psy (v1.8.1)](https://github.com/substack/psy#readme)  [![npm package](https://img.shields.io/npm/v/npmdoc-psy.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-psy) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-psy.svg)](https://travis-ci.org/npmdoc/node-npmdoc-psy)
+# npmdoc-psy
+
+#### basic api documentation for  [psy (v1.8.1)](https://github.com/substack/psy#readme)  [![npm package](https://img.shields.io/npm/v/npmdoc-psy.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-psy) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-psy.svg)](https://travis-ci.org/npmdoc/node-npmdoc-psy)
+
 #### process monitor command
 
 [![NPM](https://nodei.co/npm/psy.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/psy)
